@@ -1,5 +1,7 @@
+
 build/
 build.sh
 build.bat
 run.sh
 uos_gcc-10.5.0_toolchains.cmake
+.qtcreator/

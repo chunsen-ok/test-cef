@@ -82,6 +82,10 @@ void SimpleHandler::ShowMainWindow()
 
 void SimpleHandler::CloseAllBrowsers(bool force_close)
 {
+    if (mBrowser) {
+        mBrowser->GetHost()->CloseBrowser(force_close);
+        mBrowser.reset();
+    }
 }
 
 CefRefPtr<CefBrowser> SimpleHandler::GetBrowser()

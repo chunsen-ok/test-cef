@@ -14,6 +14,11 @@ public:
 
     void setUrl(const QUrl& url);
 
+protected:
+    bool event(QEvent* ev) override;
+    void showEvent(QShowEvent* ev) override;
+    void resizeEvent(QResizeEvent* ev) override;
+
 private:
     QScopedPointer<CefWidgetPrivate> d_ptr;
 };
