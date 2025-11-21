@@ -13,6 +13,8 @@ public:
     CefWidgetPrivate(CefWidget* ptr)
         : q_ptr(ptr)
     {}
+
+    std::size_t browserId{0};
 };
 
 CefWidget::CefWidget(const QUrl& url, QWidget* parent)
@@ -21,37 +23,30 @@ CefWidget::CefWidget(const QUrl& url, QWidget* parent)
 {
     Q_D(CefWidget);
 
-    CefWindowInfo windowInfo;
-    CefBrowserSettings browserSettings;
-    browserSettings.background_color = CefColorSetARGB(0xff, 0xff, 0xff, 0xff);
-    CefRect winRect(0, 0, width(), height());
-
-    // 将cef界面嵌入qt界面中
-    windowInfo.SetAsChild((HWND)winId(), winRect);
-    CefBrowserHost::CreateBrowser(
-        windowInfo,
-        SimpleHandler::GetInstance()->AsClient(),
-        url.toString().toStdString(),
-        browserSettings,
-        nullptr,
-        nullptr
-    );
+    d->browserId = SimpleHandler::GetInstance()->CreateBrowserForWidget(this, url);
 }
 
 CefWidget::~CefWidget()
 {
     Q_D(CefWidget);
 
-    if (auto browser = SimpleHandler::GetInstance()->GetBrowser()) {
+    if (auto browser = SimpleHandler::GetInstance()->GetBrowser(d->browserId)) {
         browser->GetHost()->TryCloseBrowser();
     }
+}
+
+size_t CefWidget::browserId() const
+{
+    Q_D(const CefWidget);
+
+    return d->browserId;
 }
 
 void CefWidget::setUrl(const QUrl& url)
 {
     Q_D(CefWidget);
 
-    if (auto browser = SimpleHandler::GetInstance()->GetBrowser()) {
+    if (auto browser = SimpleHandler::GetInstance()->GetBrowser(d->browserId)) {
         browser->GetMainFrame()->LoadURL(url.toString().toStdString());
     }
 }
@@ -73,9 +68,11 @@ void CefWidget::showEvent(QShowEvent *ev)
 
 void CefWidget::resizeEvent(QResizeEvent *ev)
 {
+    Q_D(CefWidget);
+
     QWidget::resizeEvent(ev);
 
-    if (auto browser = SimpleHandler::GetInstance()->GetBrowser()) {
+    if (auto browser = SimpleHandler::GetInstance()->GetBrowser(d->browserId)) {
         auto wid = browser->GetHost()->GetWindowHandle();
         auto rect = this->geometry();
 

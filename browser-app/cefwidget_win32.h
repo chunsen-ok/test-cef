@@ -12,6 +12,7 @@ public:
     explicit CefWidget(const QUrl& url, QWidget* parent = nullptr);
     ~CefWidget();
 
+    std::size_t browserId() const;
     void setUrl(const QUrl& url);
 
 protected:

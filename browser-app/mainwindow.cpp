@@ -11,7 +11,7 @@
 #include <QTabWidget>
 #include <QTabBar>
 
-#include "cefwidget_linux.h"
+#include "cefwidget.h"
 #include "simple_handler.h"
 
 MainWindow::MainWindow(QWidget* parent)
@@ -38,13 +38,19 @@ void MainWindow::onContextInitialized()
     vlayout->addWidget(searchField);
 
     auto web = new CefWidget(QUrl{"https://www.bing.com"}, mTabWidget);
+    body->setProperty("_browserId", web->browserId());
     vlayout->addWidget(web, 1);
 
     mTabWidget->addTab(body, tr("Cef"));
 
-    connect(SimpleHandler::GetInstance(), &SimpleHandler::titleChanged, this, [this](const QString& title){
-        auto tab = mTabWidget->tabBar();
-        tab->setTabText(1, title);
+    connect(SimpleHandler::GetInstance(), &SimpleHandler::titleChanged, this, [this](std::size_t browserId, const QString& title){
+        for (int i = 0; i < mTabWidget->count(); ++i) {
+            auto browser = mTabWidget->widget(i)->property("_browserId").value<std::size_t>();
+            if (browser == browserId) {
+                auto tab = mTabWidget->tabBar();
+                tab->setTabText(i, title);
+            }
+        }
     });
 
     connect(searchField, &QLineEdit::editingFinished, web, [web, searchField]{

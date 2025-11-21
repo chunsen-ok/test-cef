@@ -6,6 +6,7 @@ list(APPEND BROWSER_APP_SOURCES
     simple_handler.cc
     mainwindow.h
     mainwindow.cpp
+    cefwidget.h
 )
 
 if(LINUX)
